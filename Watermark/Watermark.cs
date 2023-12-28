@@ -6,12 +6,12 @@ using SixLabors.ImageSharp.Processing;
 namespace Watermark;
 public sealed class Watermark
 {
-    public async Task PrepareForWatermark()
+    public async Task<Image> PrepareForWatermark(string fileName,string watermarkFileName)
     {
         await using var originalImageStream =
-            new FileStream("/Upload.jpg", FileMode.Open, FileAccess.Read);
+            new FileStream(fileName, FileMode.Open, FileAccess.Read);
         await using var watermarkImageStream =
-            new FileStream("/watermark.png", FileMode.Open, FileAccess.Read);
+            new FileStream(watermarkFileName, FileMode.Open, FileAccess.Read);
 
         using var original = new MemoryStream();
         using var watermark = new MemoryStream();
@@ -26,18 +26,20 @@ public sealed class Watermark
         original.Position = 0;
         watermark.Position = 0;
 
-        using var result = AddWatermark(original, watermark);
+       // using var result = AddWatermark(original, watermark);
+        //
+        // var encoder = new JpegEncoder();
+        //
+        // using var resultStream = new MemoryStream();
+        // resultStream.Position = 0;
 
-        var encoder = new JpegEncoder();
+        ////   await result.SaveAsync(resultStream, encoder);
+       // await result.SaveAsync("UploadMarked.jpg");
 
-        using var resultStream = new MemoryStream();
-        resultStream.Position = 0;
-
-        //   await result.SaveAsync(resultStream, encoder);
-        await result.SaveAsync("UploadMarked.jpg");
+       return AddWatermark(original, watermark);
     }
 
-    private Image AddWatermark(Stream originalImageStream, Stream watermarkImageStream)
+    private static Image AddWatermark(Stream originalImageStream, Stream watermarkImageStream)
     {
         var image = Image.Load(originalImageStream);
         using var watermark = Image.Load(watermarkImageStream);
@@ -62,7 +64,7 @@ public sealed class Watermark
         // Draw the watermark onto the original image
         image.Mutate(x =>
             {
-                x.DrawImage(watermark, new Point(xPos, yPos), 0.3f);
+                x.DrawImage(watermark, new Point(xPos, yPos), 0.5f);
                 x.Resize(new ResizeOptions
                 {
                     Size =
